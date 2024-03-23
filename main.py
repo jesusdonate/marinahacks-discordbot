@@ -1,8 +1,7 @@
 import os
 import db_functions as db
-from pymongo import MongoClient
 from dotenv import load_dotenv
-from discord import Intents, Client, Message, Member
+from discord import Intents, Client, Member
 from responses import get_response
 
 load_dotenv()
