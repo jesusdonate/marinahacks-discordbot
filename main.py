@@ -37,12 +37,14 @@ async def on_member_join(member: Member):
     if user == None:
         return # Should user be kicked? What if they are a guest speaker who didn't register on the database?
     
-    # Fetch the appropriate Role ID. Fallback to a default if none is found.
+    # Fetch the appropriate Role ID. Fallback to a default role (Verified) if none is found.
     user_role_id = switch_roles.get(user['discord_role'], VERIFIED_ID)
 
-    # use 'await' to fetch the role as it's an asynchronous operation
     role = member.guild.get_role(user_role_id)
-    print(role)
+    
+    # All users are verified, expect if their username is not on the database
+    verified = member.guild.get_role(VERIFIED_ID)
+    await member.add_roles(verified)
 
     # Check if the role exists
     if role:
