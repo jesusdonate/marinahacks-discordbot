@@ -56,14 +56,65 @@ async def on_member_join(member: Member):
         print(f"Role with ID {user_role_id} not found.")
 
 
+
+@client.event
+async def on_presence_update(member: Member, before):
+    print(f'{member} has updated their presence status.')
+    if member.bot:
+        return  # Ignore updates from bots
+
+    # Getting member name
+    print("Getting member name...")
     
+    # Fetching roles
+    print("Fetching roles...")
+
+    # Get user information from the database
+    user = db.get_user(member.name)
+    print(f'Found User: {member}')
+    display = member.display_name
+    if user is None:
+        print(f'Using display name {display}.')
+        user = db.get_user(member.display_name)    
+
+    print(f'{user}')
+    # Fetch the appropriate Role ID. Fallback to a default if none is found.
+    user_role_id = switch_roles.get(user['discord_role'], VERIFIED_ID)
+
+    # use 'await' to fetch the role as it's an asynchronous operation
+    role = member.guild.get_role(user_role_id)
+    print(role)
+
+    # Check if the role exists
+    if role:
+        # If the role exists, assign it to the member
+        await member.add_roles(role)
+        print(f"Assigned {role.name} to {member.display_name}")
+    else:
+        # If the role doesn't exist, you might want to log this information.
+        print(f"Role with ID {user_role_id} not found.")
+
+    # Check if the role exists
+    if role:
+        # If the role exists, assign it to the member
+        await member.add_roles(role)
+        print(f"Assigned {role.name} to {member.display_name}")
+    else:
+        # If the role doesn't exist, you might want to log this information.
+        print(f"Role with ID {user_role_id} not found.")
+    
+
+
 @client.event
 async def on_ready() -> None:
     print(f'{client.user} is now running!')
 
 
+
 def start_bot() -> None:
     client.run(token=TOKEN)
+
+
 
 if __name__ == '__main__':
     start_bot()
