@@ -2,7 +2,6 @@ import os
 import db_functions as db
 from dotenv import load_dotenv
 from discord import Intents, Client, Member
-from responses import get_response
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
@@ -35,7 +34,7 @@ async def on_member_join(member: Member):
     if user == None: # username not in database. Maybe try user display name
         user = db.get_user(member.display_name)
     if user == None:
-        return # Should user be kicked? What if they are a guest speaker who didn't register on the database?
+        return # Have only @Everyone permissions.
     
     # Fetch the appropriate Role ID. Fallback to a default role (Verified) if none is found.
     user_role_id = switch_roles.get(user['discord_role'], VERIFIED_ID)

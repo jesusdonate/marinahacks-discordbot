@@ -76,7 +76,7 @@ def add_student(db):
 
             create_student_collection()
 
-            results = collection.insert_one(student)
+            collection.insert_one(student)
             print("student added!")
             break
 
@@ -176,4 +176,8 @@ def get_user(username):
         return user
     else:
         return None
-        
+
+if __name__ == '__main__':
+    print("Running db_functions.py means you want to add a student manually.")
+    add_student()
+    print()
