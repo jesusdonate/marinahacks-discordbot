@@ -168,15 +168,38 @@ def create_student_collection():
     print("student uniqueness constraints added to students collection")
 
 
-def get_user(username):
-    collection = DB["students"]
-    user = collection.find_one({'discord_username': username})
-    if user:
-        return user
+def search_collection(collection, keyword):
+    # 
+    document = collection.find_one(keyword)
+    if document:
+        return document
+    else:
+        return None
+
+
+def get_user_discord(username):
+    for collection_name in DB.list_collection_names():
+        collection = DB[collection_name]
+        user = search_collection(collection, {'discord_username': username})
+        if user:
+            return user
+    return None
+
+
+def get_user_roles(username) -> list:
+    # Iterate over all collections in the database
+    all_roles = []
+    for collection_name in DB.list_collection_names():
+        collection = DB[collection_name]
+        user_found = search_collection(collection, {'discord_username': username})
+        if user_found:
+            all_roles.append(user_found['discord_role'])
+    if all_roles: # If not empty
+        return all_roles
     else:
         return None
 
 if __name__ == '__main__':
     print("Running db_functions.py means you want to add a student manually.")
-    add_student()
+    add_student(DB)
     print()

@@ -30,29 +30,40 @@ client: Client = Client(intents=intents)
 @client.event
 async def on_member_join(member: Member):
     print(f'{member} has joined the server.')
-    user = db.get_user(member.name)
+    user = db.get_user_discord(member.name)
     if user == None: # username not in database. Maybe try user display name
-        user = db.get_user(member.display_name)
+        user = db.get_user_discord(member.display_name)
     if user == None:
         return # Have only @Everyone permissions.
+    print("Beforeasdaddasdas")
     
-    # Fetch the appropriate Role ID. Fallback to a default role (Verified) if none is found.
-    user_role_id = switch_roles.get(user['discord_role'], VERIFIED_ID)
+    role_ids = []
+    user_roles = db.get_user_roles(user['discord_username'])
+    
+    for role in user_roles:
+        # Fetch the appropriate Role ID. Fallback to a default role (Verified) if none is found.
+        role_ids.append(switch_roles.get(role))
+    
+    print("Beforeasdaddasdas")
 
-    role = member.guild.get_role(user_role_id)
-    
-    # All users are verified, expect if their username is not on the database
-    verified = member.guild.get_role(VERIFIED_ID)
-    await member.add_roles(verified)
+
+    if role_ids != []:
+        roles = [member.guild.get_role(role_id) for role_id in role_ids]
+    role_names = list(role.name for role in roles)
+    print("Beforeasdaddasdas")
 
     # Check if the role exists
-    if role:
+    if roles:
         # If the role exists, assign it to the member
-        await member.add_roles(role)
-        print(f"Assigned {role.name} to {member.display_name}")
+        await member.add_roles(*roles)
+        print(f"Assigned {role_names} to {member.display_name}")
+        print("Beforeasdaddasdas")
+
     else:
         # If the role doesn't exist, you might want to log this information.
-        print(f"Role with ID {user_role_id} not found.")
+        print(f"Role with ID {role_ids} not found.")
+        print("Some bs")
+
 
 
 
@@ -69,12 +80,12 @@ async def on_presence_update(member: Member, before):
     print("Fetching roles...")
 
     # Get user information from the database
-    user = db.get_user(member.name)
+    user = db.get_user_discord(member.name)
     print(f'Found User: {member}')
     display = member.display_name
     if user is None:
         print(f'Using display name {display}.')
-        user = db.get_user(member.display_name)    
+        user = db.get_user_discord(member.display_name)    
 
     print(f'{user}')
     # Fetch the appropriate Role ID. Fallback to a default if none is found.
