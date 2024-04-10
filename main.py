@@ -27,38 +27,73 @@ intents.message_content = True
 intents.members = True
 client: Client = Client(intents=intents)
 
+# @client.event
+# async def on_member_join(member: Member):
+#     print(f'{member} has joined the server.')
+#     user = db.get_user_discord(member.name)
+#     if user == None: # username not in database. Maybe try user display name
+#         user = db.get_user_discord(member.display_name)
+#     if user == None:
+#         return # Have only @Everyone permissions.
+    
+#     role_ids = []
+#     user_roles = db.get_user_roles(user['discord_username'])
+    
+#     for role in user_roles:
+#         # Fetch the appropriate Role ID. Fallback to a default role (Verified) if none is found.
+#         role_ids.append(switch_roles.get(role))
+
+
+#     if role_ids != []:
+#         roles = [member.guild.get_role(role_id) for role_id in role_ids]
+#     role_names = list(role.name for role in roles)
+
+#     # Check if the role exists
+#     if roles:
+#         # If the role exists, assign it to the member
+#         await member.add_roles(*roles)
+#         print(f"Assigned {role_names} to {member.display_name}")
+
+#     else:
+#         # If the role doesn't exist, you might want to log this information.
+#         print(f"Role with ID {role_ids} not found.")
+
+
 @client.event
-async def on_member_join(member: Member):
-    print(f'{member} has joined the server.')
-    user = db.get_user_discord(member.name)
-    if user == None: # username not in database. Maybe try user display name
-        user = db.get_user_discord(member.display_name)
-    if user == None:
-        return # Have only @Everyone permissions.
-    
-    role_ids = []
-    user_roles = db.get_user_roles(user['discord_username'])
-    
-    for role in user_roles:
-        # Fetch the appropriate Role ID. Fallback to a default role (Verified) if none is found.
-        role_ids.append(switch_roles.get(role))
+async def on_reaction_add(reaction, member):
+    # Check if the reaction is on the specific message you're interested in
+    # and that the reaction is from a user, not a bot
+    SPECIFIC_MESSAGE_ID = 1227711533866287194
+    if reaction.message.id == SPECIFIC_MESSAGE_ID and not member.bot:
+        if str(reaction.emoji) == "🌊":
+            print(f'{member} has accepted the rules.')
+            user = db.get_user_discord(member.name)
+            if user == None: # username not in database. Maybe try user display name
+                user = db.get_user_discord(member.display_name)
+            if user == None:
+                return # Have only @Everyone permissions.
+            
+            role_ids = []
+            user_roles = db.get_user_roles(user['discord_username'])
+            
+            for role in user_roles:
+                # Fetch the appropriate Role ID. Fallback to a default role (Verified) if none is found.
+                role_ids.append(switch_roles.get(role))
 
 
-    if role_ids != []:
-        roles = [member.guild.get_role(role_id) for role_id in role_ids]
-    role_names = list(role.name for role in roles)
+            if role_ids != []:
+                roles = [member.guild.get_role(role_id) for role_id in role_ids]
+            role_names = list(role.name for role in roles)
 
-    # Check if the role exists
-    if roles:
-        # If the role exists, assign it to the member
-        await member.add_roles(*roles)
-        print(f"Assigned {role_names} to {member.display_name}")
+            # Check if the role exists
+            if roles:
+                # If the role exists, assign it to the member
+                await member.add_roles(*roles)
+                print(f"Assigned {role_names} to {member.display_name}")
 
-    else:
-        # If the role doesn't exist, you might want to log this information.
-        print(f"Role with ID {role_ids} not found.")
-
-
+            else:
+                # If the role doesn't exist, you might want to log this information.
+                print(f"Role with ID {role_ids} not found.")
 
 
 @client.event
