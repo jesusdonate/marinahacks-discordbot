@@ -181,8 +181,6 @@ def get_user_discord(username):
     # list_collection_names = ['committee_members', 'guest_speakers', 'hackers', 'judges']
     for collection_name in DB.list_collection_names():
         collection = DB[collection_name]
-        print(collection_name)
-        print(collection)
         user = search_collection(collection, {'discord_username': username})
         print(user)
         if user:
