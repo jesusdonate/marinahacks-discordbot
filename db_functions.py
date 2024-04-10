@@ -178,10 +178,8 @@ def search_collection(collection, keyword):
 
 
 def get_user_discord(username):
-    print('INside get_user_discord')
-    list_collection_names = ['committee_members', 'guest_speakers', 'hackers', 'judges']
-    for collection_name in list_collection_names:
-        print(' Inside loop')
+    # list_collection_names = ['committee_members', 'guest_speakers', 'hackers', 'judges']
+    for collection_name in DB.list_collection_names():
         collection = DB[collection_name]
         print(collection_name)
         print(collection)

@@ -35,7 +35,6 @@ async def on_member_join(member: Member):
         user = db.get_user_discord(member.display_name)
     if user == None:
         return # Have only @Everyone permissions.
-    print("Beforeasdaddasdas")
     
     role_ids = []
     user_roles = db.get_user_roles(user['discord_username'])
@@ -43,26 +42,21 @@ async def on_member_join(member: Member):
     for role in user_roles:
         # Fetch the appropriate Role ID. Fallback to a default role (Verified) if none is found.
         role_ids.append(switch_roles.get(role))
-    
-    print("Beforeasdaddasdas")
 
 
     if role_ids != []:
         roles = [member.guild.get_role(role_id) for role_id in role_ids]
     role_names = list(role.name for role in roles)
-    print("Beforeasdaddasdas")
 
     # Check if the role exists
     if roles:
         # If the role exists, assign it to the member
         await member.add_roles(*roles)
         print(f"Assigned {role_names} to {member.display_name}")
-        print("Beforeasdaddasdas")
 
     else:
         # If the role doesn't exist, you might want to log this information.
         print(f"Role with ID {role_ids} not found.")
-        print("Some bs")
 
 
 
