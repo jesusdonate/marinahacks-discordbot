@@ -15,6 +15,7 @@ GUEST_SPEAKER_ID = 1220822872172400752
 JUDGE_ID = 1220823893149745233
 COMMITTEE_MEMBER_ID = 1217712596556189778
 VERIFIED_ID = 1217711607140843610
+ADMIN_ID = 1227752395879088168
 switch_roles = {
     'Hacker': HACKER_ID,
     'Sponsor': SPONSOR_ID,
@@ -67,36 +68,67 @@ async def on_raw_reaction_add(payload):
             return
         SPECIFIC_MESSAGE_ID = 1227711533866287194
         if payload.message_id == SPECIFIC_MESSAGE_ID:
-            # Now check for the specific emoji
-            if payload.emoji.name == "sharkira":  # Adjust the emoji check as needed
-                print(f'{member} has accepted the rules.')
-                user = db.get_user_discord(member.name)
-                if user == None: # username not in database. Maybe try user display name
-                    user = db.get_user_discord(member.display_name)
-                if user == None:
-                    return # Have only @Everyone permissions.
-                
-                role_ids = []
+
+            if payload.emoji.name != "sharkira":
+                return # Do nothing if not sharkira
+            
+            print(f'{member} has accepted the rules.')
+            user = db.get_user_discord(member.name)
+            if user == None: # username not in database. Maybe try user display name
+                user = db.get_user_discord(member.display_name)
+            
+            if user:
                 user_roles = db.get_user_roles(user['discord_username'])
-                
-                for role in user_roles:
-                    # Fetch the appropriate Role ID. Fallback to a default role (Verified) if none is found.
-                    role_ids.append(switch_roles.get(role))
+
+            role_ids = []
+            for role in user_roles:
+                # Fetch the appropriate Role ID. Fallback to a default role (Verified) if none is found.
+                role_ids.append(switch_roles.get(role))
+            
+            # All people get verified if they accept the rules
+            role_ids.append(VERIFIED_ID)
+
+            if role_ids != []:
+                roles = [member.guild.get_role(role_id) for role_id in role_ids]
+            role_names = list(role.name for role in roles)
+
+            # Check if the role exists
+            if roles:
+                # If the role exists, assign it to the member
+                await member.add_roles(*roles)
+                print(f"Assigned {role_names} to {member.display_name}")
+
+            else:
+                # If the role doesn't exist, you might want to log this information.
+                print(f"Role with ID {role_ids} not found.")
 
 
-                if role_ids != []:
-                    roles = [member.guild.get_role(role_id) for role_id in role_ids]
-                role_names = list(role.name for role in roles)
+@client.event
+async def on_raw_reaction_remove(payload):
+    if payload.guild_id is not None:
+        guild = client.get_guild(payload.guild_id)
 
-                # Check if the role exists
-                if roles:
-                    # If the role exists, assign it to the member
-                    await member.add_roles(*roles)
-                    print(f"Assigned {role_names} to {member.display_name}")
+        # Fetch the member from the guild using the user ID from the payload
+        member = await guild.fetch_member(payload.user_id)
 
-                else:
-                    # If the role doesn't exist, you might want to log this information.
-                    print(f"Role with ID {role_ids} not found.")
+        if member is None or member.bot:
+            return
+
+        SPECIFIC_MESSAGE_ID = 1227711533866287194
+        if payload.message_id == SPECIFIC_MESSAGE_ID:
+            if payload.emoji.name != "sharkira":
+                return  # Do nothing if not the specified emoji
+            
+            print(f'{member} has removed their acceptance of the rules.')
+
+            # Exclude @everyone role and the Admin role
+            ADMIN_ROLE_ID = 1227752395879088168
+            roles_to_remove = [role for role in member.roles if role.id != ADMIN_ID and role != guild.default_role]
+            
+            if roles_to_remove:
+                await member.remove_roles(*roles_to_remove)
+                print(f"All roles, except Admin, have been removed from {member.display_name}.")
+
 
 
 # @client.event
