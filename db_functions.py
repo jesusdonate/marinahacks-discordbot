@@ -182,7 +182,7 @@ def get_user_discord(username):
     for collection_name in DB.list_collection_names():
         collection = DB[collection_name]
         user = search_collection(collection, {'discord_username': username})
-        print(user)
+        
         if user:
             return user
     return None
